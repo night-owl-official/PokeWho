@@ -23,6 +23,8 @@ intents.message_content = True
 poke_who = commands.Bot(command_prefix='?',
                         description=description, intents=intents)
 
+poke_who.remove_command("help")
+
 
 @poke_who.event
 async def on_ready():
