@@ -25,16 +25,20 @@ class PokemonCog(commands.Cog):
         except requests.exceptions.RequestException as e:
             print(e)
 
+    def get_pokemon_embed(self) -> discord.Embed:
+        pokemon_embed = discord.Embed(
+            title="Who's this Pokemon?!", color=discord.Color.random())
+        pokemon_embed.set_image(
+            url=f"{pokemon_gif_url}{self.pokemon_name}.gif")
+
+        return pokemon_embed
+
     @commands.command(name="pokemon", aliases=["p"], help="Generate a random pokemon")
     async def pokemon(self, ctx: commands.Context):
         await self.set_random_pokemon()
 
         if (self.pokemon_name != None):
-            pokemon_embed = discord.Embed(
-                title="Who's this Pokemon?!", color=discord.Color.random())
-            pokemon_embed.set_image(
-                url=f"{pokemon_gif_url}{self.pokemon_name}.gif")
-            await ctx.send(embed=pokemon_embed)
+            await ctx.send(embed=self.get_pokemon_embed())
 
             def is_correct(msg):
                 return msg.author == ctx.author and msg.channel == ctx.channel
