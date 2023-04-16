@@ -8,7 +8,6 @@ from pokemon_cog import PokemonCog
 
 load_dotenv()
 token = os.getenv("TOKEN")
-cmd_prefix = os.getenv("COMMAND_PREFIX")
 
 description = """
 **Guess the Pokemon!**
@@ -19,7 +18,7 @@ and the user will have to guess who that Pokemon is by entering its name.
 intents = discord.Intents.default()
 intents.message_content = True
 
-poke_who = commands.Bot(command_prefix=cmd_prefix,
+poke_who = commands.Bot(command_prefix='?',
                         description=description, intents=intents)
 
 

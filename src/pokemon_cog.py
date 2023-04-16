@@ -12,19 +12,28 @@ class PokemonCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.timeout = 10.0
+        self.pokemon_name = None
 
-    @commands.command(name="pokemon", aliases=["p"], help="Generate a random pokemon")
-    async def get_random_pokemon(self, ctx: commands.Context):
+    async def set_random_pokemon(self):
+        rand_poke_id = random.randint(1, 905)
+
         try:
-            rand_poke_id = random.randint(1, 905)
             api_request = requests.get(f"{pokeapi_url}{rand_poke_id}")
             response_json = api_request.json()
 
-            pokemon_name = response_json["name"]
+            self.pokemon_name = response_json["name"]
+        except requests.exceptions.RequestException as e:
+            print(e)
 
+    @commands.command(name="pokemon", aliases=["p"], help="Generate a random pokemon")
+    async def pokemon(self, ctx: commands.Context):
+        await self.set_random_pokemon()
+
+        if (self.pokemon_name != None):
             pokemon_embed = discord.Embed(
                 title="Who's this Pokemon?!", color=discord.Color.random())
-            pokemon_embed.set_image(url=f"{pokemon_gif_url}{pokemon_name}.gif")
+            pokemon_embed.set_image(
+                url=f"{pokemon_gif_url}{self.pokemon_name}.gif")
             await ctx.send(embed=pokemon_embed)
 
             def is_correct(msg):
@@ -33,11 +42,11 @@ class PokemonCog(commands.Cog):
             try:
                 guess = await self.bot.wait_for("message", check=is_correct, timeout=self.timeout)
             except asyncio.TimeoutError:
-                return await ctx.send(f"Sorry, you took too long. The answer was {pokemon_name}")
+                return await ctx.send(f"Sorry, you took too long. The answer was {self.pokemon_name}")
 
-            if guess.content.lower() == pokemon_name.lower():
+            if guess.content.lower() == self.pokemon_name.lower():
                 await ctx.send("Correct!!")
             else:
-                await ctx.send(f"Oops. It's actually {pokemon_name}.")
-        except:
-            await ctx.send("Error retrieving data from the API")
+                await ctx.send(f"Oops. It's actually {self.pokemon_name}.")
+        else:
+            await ctx.send("I'm having issues... :cry:")
