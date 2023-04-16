@@ -1,4 +1,5 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import asyncio
 import requests
@@ -39,28 +40,28 @@ class PokemonCog(commands.Cog):
     def is_guess_correct(self, guess: str) -> bool:
         return guess.content.lower() == self.pokemon_name.lower()
 
-    @commands.command(name="pokemon", aliases=["p"], help="Generate a random pokemon")
-    async def pokemon(self, ctx: commands.Context):
+    @app_commands.command(name="pokemon", description="Generate a random Pokemon and wait for a guess")
+    async def pokemon(self, interaction: discord.Interaction):
         await self.set_random_pokemon()
 
         # Make sure the bot doesn't continue running if there was some issues with the api request
         if (self.pokemon_name != None):
-            await ctx.send(embed=self.get_pokemon_embed())
+            await interaction.response.send_message(embed=self.get_pokemon_embed())
 
             # Check if whoever fired the command in a channel
             # is the same user that responded to the bot in that same channel
             def is_correct(msg):
-                return msg.author == ctx.author and msg.channel == ctx.channel
+                return msg.author == interaction.user and msg.channel == interaction.channel
 
             # User has a time limit to take a guess, after which the bot will stop waiting
             try:
                 guess = await self.bot.wait_for("message", check=is_correct, timeout=self.timeout)
             except asyncio.TimeoutError:
-                return await ctx.send(f"**Sorry, you took too long. The answer was** ***{self.pokemon_name}***")
+                return await interaction.followup.send(f"**Sorry, you took too long. The answer was** ***{self.pokemon_name}***")
 
             if self.is_guess_correct(guess):
-                await ctx.send(":tada: **Correct!!** :tada:")
+                await interaction.followup.send(":tada: **Correct!!** :tada:")
             else:
-                await ctx.send(f"**Oops** :tired_face: **It's actually** ***{self.pokemon_name}.***")
+                await interaction.followup.send(f"**Oops** :tired_face: **It's actually** ***{self.pokemon_name}.***")
         else:
-            await ctx.send("**I'm having issues...** :cry:")
+            await interaction.response.send_message("**I'm having issues...** :cry:")
