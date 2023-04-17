@@ -57,11 +57,11 @@ class PokemonCog(commands.Cog):
             try:
                 guess = await self.bot.wait_for("message", check=is_correct, timeout=self.timeout)
             except asyncio.TimeoutError:
-                return await interaction.followup.send(f"**Sorry, you took too long. The answer was** ***{self.pokemon_name}***")
+                return await interaction.followup.send(f"**Sorry, you took too long. The answer was** *{self.pokemon_name}*", ephemeral=True)
 
             if self.is_guess_correct(guess):
-                await interaction.followup.send(":tada: **Correct!!** :tada:")
+                await interaction.followup.send(":tada: **Correct!!** :tada:", ephemeral=True)
             else:
-                await interaction.followup.send(f"**Oops** :tired_face: **It's actually** ***{self.pokemon_name}.***")
+                await interaction.followup.send(f"**Oops** :tired_face: **It's actually** *{self.pokemon_name}.*", ephemeral=True)
         else:
             await interaction.response.send_message("**I'm having issues...** :cry:")
